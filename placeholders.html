@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title>Placeholder Generator</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            color: #333;
+        }
+
+        .instructions {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .placeholder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .placeholder-item {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .placeholder-image {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .placeholder-info {
+            padding: 15px;
+        }
+
+        .placeholder-title {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .placeholder-category {
+            color: #666;
+            font-size: 14px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>📸 Photography Portfolio - Placeholder Images</h1>
+
+        <div class="instructions">
+            <h2>How to Add Your Photos</h2>
+            <ol>
+                <li><strong>Take screenshots</strong> of the colored boxes below (or use any of your photos)</li>
+                <li><strong>Save them</strong> with these exact names in the "Photography Site" folder:
+                    <ul>
+                        <li>gallery-1.jpg</li>
+                        <li>gallery-2.jpg</li>
+                        <li>gallery-3.jpg</li>
+                        <li>gallery-4.jpg</li>
+                        <li>gallery-5.jpg</li>
+                        <li>gallery-6.jpg</li>
+                        <li>about-photo.jpg</li>
+                    </ul>
+                </li>
+                <li><strong>Replace these placeholders</strong> with your actual photography</li>
+                <li><strong>Update EXIF data</strong> in script.js to match your photos</li>
+            </ol>
+            <p><strong>Note:</strong> These are just placeholders. Replace them with your beautiful photography to make
+                your portfolio shine! ✨</p>
+        </div>
+
+        <h2>Gallery Placeholders</h2>
+        <div class="placeholder-grid">
+            <div class="placeholder-item">
+                <div class="placeholder-image" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                    📷 Photo 1
+                </div>
+                <div class="placeholder-info">
+                    <div class="placeholder-title">Golden Hour Landscape</div>
+                    <div class="placeholder-category">Landscape</div>
+                </div>
+            </div>
+
+            <div class="placeholder-item">
+                <div class="placeholder-image" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                    📷 Photo 2
+                </div>
+                <div class="placeholder-info">
+                    <div class="placeholder-title">Urban Portrait</div>
+                    <div class="placeholder-category">Portrait</div>
+                </div>
+            </div>
+
+            <div class="placeholder-item">
+                <div class="placeholder-image" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">
+                    📷 Photo 3
+                </div>
+                <div class="placeholder-info">
+                    <div class="placeholder-title">City Lights</div>
+                    <div class="placeholder-category">Street</div>
+                </div>
+            </div>
+
+            <div class="placeholder-item">
+                <div class="placeholder-image" style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);">
+                    📷 Photo 4
+                </div>
+                <div class="placeholder-info">
+                    <div class="placeholder-title">Mountain Sunrise</div>
+                    <div class="placeholder-category">Landscape</div>
+                </div>
+            </div>
+
+            <div class="placeholder-item">
+                <div class="placeholder-image" style="background: linear-gradient(135deg, #30cfd0 0%, #330867 100%);">
+                    📷 Photo 5
+                </div>
+                <div class="placeholder-info">
+                    <div class="placeholder-title">Wildlife Close-up</div>
+                    <div class="placeholder-category">Nature</div>
+                </div>
+            </div>
+
+            <div class="placeholder-item">
+                <div class="placeholder-image" style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);">
+                    📷 Photo 6
+                </div>
+                <div class="placeholder-info">
+                    <div class="placeholder-title">Street Photography</div>
+                    <div class="placeholder-category">Street</div>
+                </div>
+            </div>
+        </div>
+
+        <h2 style="margin-top: 40px;">About Section Photo</h2>
+        <div class="placeholder-item" style="max-width: 400px;">
+            <div class="placeholder-image"
+                style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); aspect-ratio: 1/1;">
+                👤 Your Photo
+            </div>
+            <div class="placeholder-info">
+                <div class="placeholder-title">about-photo.jpg</div>
+                <div class="placeholder-category">Your profile picture for the About section</div>
+            </div>
+        </div>
+
+        <div class="instructions" style="margin-top: 40px;">
+            <h2>Quick Start Tips</h2>
+            <ul>
+                <li>✅ Use high-quality photos (1920x1080 or higher)</li>
+                <li>✅ Compress images to under 500KB each</li>
+                <li>✅ Use JPG or PNG format</li>
+                <li>✅ Update EXIF data in script.js with your camera settings</li>
+                <li>✅ Test on both desktop and mobile</li>
+            </ul>
+            <p><strong>Ready to launch?</strong> Open index.html in your browser to see your portfolio!</p>
+        </div>
+    </div>
+</body>
+
+</html>

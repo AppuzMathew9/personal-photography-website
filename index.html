@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Photography Portfolio - Capturing Moments with Passion</title>
+    <meta name="description"
+        content="Mobile photography portfolio showcasing stunning photographs captured with passion. Explore my work and support my creative journey.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="noise-overlay"></div>
+    <div class="cursor-dot"></div>
+    <div class="cursor-outline"></div>
+
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <span class="logo-text">PhotoFolio</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="#home" class="nav-link active">Home</a></li>
+                <li><a href="#gallery" class="nav-link">Gallery</a></li>
+                <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#support" class="nav-link">Support</a></li>
+                <li><a href="admin.html" class="nav-link admin-link">Admin</a></li>
+            </ul>
+            <button class="mobile-menu-toggle" aria-label="Toggle menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-overlay"></div>
+        <div class="hero-content">
+            <h1 class="hero-title">Capturing Life's Beautiful Moments</h1>
+            <p class="hero-subtitle">Through the lens of my phone and passion</p>
+            <a href="#gallery" class="cta-button">Explore Gallery</a>
+        </div>
+        <div class="scroll-indicator">
+            <span>Scroll</span>
+            <div class="scroll-line"></div>
+        </div>
+    </section>
+
+    <!-- Gallery Section -->
+    <section id="gallery" class="gallery-section">
+        <div class="section-header">
+            <h2 class="section-title">My Gallery</h2>
+            <p class="section-subtitle">A collection of moments frozen in time</p>
+        </div>
+
+        <div class="gallery-filters">
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="landscape">Landscape</button>
+            <button class="filter-btn" data-filter="portrait">Portrait</button>
+            <button class="filter-btn" data-filter="street">Street</button>
+            <button class="filter-btn" data-filter="nature">Nature</button>
+        </div>
+
+        <div class="gallery-grid" id="galleryGrid">
+            <!-- Gallery items will be dynamically loaded -->
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about-section">
+        <div class="about-container">
+            <div class="about-image">
+                <div class="about-image-wrapper">
+                    <img src="about-photo.jpg" alt="Photographer" id="aboutPhoto">
+                    <div class="about-image-overlay"></div>
+                </div>
+            </div>
+            <div class="about-content">
+                <h2 class="section-title">About Me</h2>
+                <div class="about-text">
+                    <p class="intro-text">Hello! I'm a working professional who discovered the magic of photography
+                        through my smartphone.</p>
+
+                    <p>By day, I navigate the corporate world, but photography has become my creative escape. Armed with
+                        just my phone, I've learned that great photography isn't about expensive gear—it's about seeing
+                        the world differently and capturing moments that tell stories.</p>
+
+                    <p>Every photograph in my portfolio represents a moment of connection—with nature, with people, with
+                        light and shadow. I believe that the best camera is the one you have with you, and I pour my
+                        heart into every shot I take.</p>
+
+                    <p>Photography is my passion, not my profession. It's how I express myself, how I see beauty in
+                        everyday moments, and how I share my perspective with the world.</p>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">500+</div>
+                        <div class="stat-label">Photos Captured</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">50+</div>
+                        <div class="stat-label">Locations Explored</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">📱</div>
+                        <div class="stat-label">Mobile Photography</div>
+                    </div>
+                </div>
+
+                <div class="passion-note">
+                    <div class="passion-icon">❤️</div>
+                    <p>"The best camera is the one you have with you. For me, that's my phone, and it's all I need to
+                        capture the beauty I see every day."</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Support Section -->
+    <section id="support" class="support-section">
+        <div class="support-container">
+            <div class="support-header">
+                <h2 class="section-title">Enjoyed the Photos?</h2>
+                <p class="section-subtitle">If my photos brought a smile to your face, consider buying me a coffee! ☕
+                </p>
+            </div>
+
+            <div class="support-content">
+                <div class="support-info">
+                    <div class="support-card">
+                        <div class="support-icon">☕</div>
+                        <h3>Buy Me a Coffee</h3>
+                        <p>Just a small token of appreciation for the photos you enjoyed</p>
+                    </div>
+                    <div class="support-card">
+                        <div class="support-icon">🌍</div>
+                        <h3>Support My Adventures</h3>
+                        <p>Help me explore new places and capture more beautiful moments</p>
+                    </div>
+                    <div class="support-card">
+                        <div class="support-icon">❤️</div>
+                        <h3>Show Some Love</h3>
+                        <p>Your appreciation keeps me motivated to share more photography</p>
+                    </div>
+                </div>
+
+                <div class="tip-form-container">
+                    <div class="tip-form">
+                        <h3>Send a Small Appreciation</h3>
+                        <div class="tip-amounts">
+                            <button class="tip-amount" data-amount="10">₹10</button>
+                            <button class="tip-amount" data-amount="20">₹20</button>
+                            <button class="tip-amount" data-amount="50">₹50</button>
+                            <button class="tip-amount" data-amount="100">₹100</button>
+                        </div>
+                        <div class="custom-amount">
+                            <label for="customAmount">Custom Amount (₹)</label>
+                            <input type="number" id="customAmount" placeholder="Enter amount" min="1">
+                        </div>
+                        <div class="message-box">
+                            <label for="tipMessage">Leave a message (optional)</label>
+                            <textarea id="tipMessage" placeholder="Say hi or share what you liked about my photos..."
+                                rows="4"></textarea>
+                        </div>
+                        <button class="tip-submit-btn" id="tipSubmitBtn">
+                            <span>Send Appreciation ☕</span>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-section brand-section">
+                <h4>PhotoFolio</h4>
+                <p>Capturing moments, creating memories through mobile photography.</p>
+            </div>
+
+            <div class="footer-section social-section">
+                <h4>Connect With Me</h4>
+                <div class="social-links-visual">
+                    <a href="https://www.instagram.com/a_p_z.mt?igsh=ODl1cml3eDNka3Yz&utm_source=qr"
+                        class="social-card instagram">
+                        <span class="social-icon">📸</span>
+                        <div class="social-info">
+                            <span class="platform">Instagram</span>
+                            <span class="handle">@a_p_z.mt</span>
+                        </div>
+                    </a>
+                    <a href="https://www.facebook.com/share/1A4jsdzjsU/?mibextid=wwXIfr" class="social-card facebook">
+                        <span class="social-icon">👥</span>
+                        <div class="social-info">
+                            <span class="platform">Facebook</span>
+                            <span class="handle">@sijomathew</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+
+            <div class="footer-section contact-section">
+                <h4>Contact</h4>
+                <a href="mailto:appuzmathew9@gmail.com" class="email-link">
+                    <span class="icon">✉️</span>
+                    appuzmathew9@gmail.com
+                </a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2025 PhotoFolio. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Image Modal -->
+    <div class="modal" id="imageModal">
+        <div class="modal-overlay" id="modalOverlay"></div>
+        <div class="modal-content">
+            <button class="modal-close" id="modalClose">&times;</button>
+            <div class="modal-image-container">
+                <img src="" alt="" id="modalImage">
+            </div>
+            <div class="modal-info">
+                <h3 id="modalTitle"></h3>
+                <div class="exif-data" id="exifData">
+                    <!-- EXIF data will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Razorpay Checkout Script -->
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="config.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>

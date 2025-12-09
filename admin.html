@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - Photo Upload</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .admin-container {
+            max-width: 800px;
+            margin: 100px auto;
+            padding: 2rem;
+        }
+
+        .login-box,
+        .upload-box {
+            background: var(--bg-card);
+            padding: 3rem;
+            border-radius: var(--radius-lg);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .admin-title {
+            font-size: 2rem;
+            margin-bottom: 2rem;
+            text-align: center;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            color: var(--text-primary);
+            font-family: inherit;
+            font-size: 1rem;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 1.25rem;
+            background: var(--primary-gradient);
+            color: white;
+            border: none;
+            border-radius: var(--radius-sm);
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition-normal);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 30px rgba(102, 126, 234, 0.6);
+        }
+
+        .btn-secondary {
+            padding: 0.75rem 1.5rem;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+            transition: var(--transition-fast);
+        }
+
+        .btn-secondary:hover {
+            background: var(--bg-card-hover);
+        }
+
+        .image-preview {
+            margin-top: 1rem;
+            max-width: 100%;
+            border-radius: var(--radius-md);
+            display: none;
+        }
+
+        .image-preview.show {
+            display: block;
+        }
+
+        .success-message {
+            background: rgba(67, 233, 123, 0.1);
+            border: 1px solid rgba(67, 233, 123, 0.3);
+            color: #43e97b;
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message.show {
+            display: block;
+        }
+
+        .photos-list {
+            margin-top: 2rem;
+        }
+
+        .photo-item {
+            background: var(--bg-secondary);
+            padding: 1rem;
+            border-radius: var(--radius-sm);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .photo-item img {
+            width: 80px;
+            height: 60px;
+            object-fit: cover;
+            border-radius: var(--radius-sm);
+        }
+
+        .photo-info {
+            flex: 1;
+            margin-left: 1rem;
+        }
+
+        .photo-title {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+        }
+
+        .photo-category {
+            font-size: 0.875rem;
+            color: var(--text-muted);
+        }
+
+        .btn-delete {
+            padding: 0.5rem 1rem;
+            background: rgba(245, 87, 108, 0.1);
+            color: #f5576c;
+            border: 1px solid rgba(245, 87, 108, 0.3);
+            border-radius: var(--radius-sm);
+            cursor: pointer;
+        }
+
+        .btn-delete:hover {
+            background: rgba(245, 87, 108, 0.2);
+        }
+
+        .logout-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+        }
+    </style>
+    <style>
+        /* Force cursor to be visible in admin panel */
+        * {
+            cursor: auto !important;
+        }
+
+        .btn-primary,
+        .btn-secondary,
+        button,
+        a {
+            cursor: pointer !important;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="admin-container">
+        <!-- Login Box -->
+        <div class="login-box" id="loginBox">
+            <h1 class="admin-title">🔒 Admin Login</h1>
+            <div class="form-group">
+                <label for="adminPassword">Password</label>
+                <input type="password" id="adminPassword" placeholder="Enter admin password">
+            </div>
+            <button class="btn-primary" onclick="login()">Login</button>
+        </div>
+
+        <!-- Upload Box (Hidden initially) -->
+        <div class="upload-box" id="uploadBox" style="display: none;">
+            <button class="btn-secondary logout-btn" onclick="logout()">Logout</button>
+
+            <!-- Profile Photo Section -->
+            <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+                <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Update Profile Photo</h2>
+                <div class="form-group">
+                    <input type="file" id="profilePhoto" accept="image/*">
+                </div>
+                <button class="btn-primary" onclick="uploadProfilePhoto()"
+                    style="width: auto; padding: 0.5rem 1.5rem;">Update Profile</button>
+            </div>
+
+            <!-- Payment Configuration Section -->
+            <div style="background: rgba(255,255,255,0.05); padding: 1.5rem; border-radius: 12px; margin-bottom: 2rem;">
+                <h2 style="font-size: 1.5rem; margin-bottom: 1rem;">Payment Settings (UPI / QR)</h2>
+                <div class="form-group">
+                    <label>Your UPI ID (e.g., username@okaxis)</label>
+                    <input type="text" id="upiIdInput" placeholder="Enter UPI ID">
+                </div>
+                <div class="form-group">
+                    <label>Upload QR Code Image (Screenshot from GPay/PhonePe)</label>
+                    <input type="file" id="qrCodeInput" accept="image/*">
+                </div>
+                <button class="btn-primary" onclick="updatePaymentSettings()"
+                    style="width: auto; padding: 0.5rem 1.5rem;">Save Payment Settings</button>
+            </div>
+
+            <h1 class="admin-title">📸 Upload New Gallery Photo</h1>
+
+            <div class="success-message" id="successMessage">
+                Photo uploaded successfully!
+            </div>
+
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="photoFile">Select Photo</label>
+                    <input type="file" id="photoFile" accept="image/*" required onchange="previewImage()">
+                    <img id="imagePreview" class="image-preview">
+                </div>
+
+                <div class="form-group">
+                    <label for="photoTitle">Photo Title</label>
+                    <input type="text" id="photoTitle" placeholder="e.g., Golden Hour Landscape" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="photoCategory">Category</label>
+                    <select id="photoCategory" required>
+                        <option value="">Select category</option>
+                        <option value="landscape">Landscape</option>
+                        <option value="portrait">Portrait</option>
+                        <option value="street">Street</option>
+                        <option value="nature">Nature</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="phoneModel">Phone Model</label>
+                    <input type="text" id="phoneModel" placeholder="e.g., iPhone 14 Pro" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="aperture">Aperture</label>
+                    <input type="text" id="aperture" placeholder="e.g., f/1.8">
+                </div>
+
+                <div class="form-group">
+                    <label for="shutter">Shutter Speed</label>
+                    <input type="text" id="shutter" placeholder="e.g., 1/250s">
+                </div>
+
+                <div class="form-group">
+                    <label for="iso">ISO</label>
+                    <input type="text" id="iso" placeholder="e.g., 100">
+                </div>
+
+                <div class="form-group">
+                    <label for="focalLength">Focal Length</label>
+                    <input type="text" id="focalLength" placeholder="e.g., 26mm">
+                </div>
+
+                <div class="form-group">
+                    <label for="dateTaken">Date Taken</label>
+                    <input type="date" id="dateTaken" required>
+                </div>
+
+                <button type="submit" class="btn-primary">Upload Photo</button>
+            </form>
+
+            <div class="photos-list" id="photosList">
+                <h2 style="margin-top: 3rem; margin-bottom: 1rem;">Uploaded Photos</h2>
+                <!-- Photos will be listed here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+
+        function logout() {
+            if (useFirebase) {
+                auth.signOut();
+            } else {
+                sessionStorage.removeItem('adminLoggedIn');
+                showLoginUI();
+            }
+        }
+
+        if (!useFirebase && sessionStorage.getItem('adminLoggedIn') === 'true') {
+            showUploadUI();
+        }
+
+        // --- MIGRATION LOGIC ---
+        function checkMigrationNeeded() {
+            const localPhotos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
+            if (localPhotos.length > 0) {
+                // Remove existing if any
+                const existingAlert = document.getElementById('migrationAlert');
+                if (existingAlert) existingAlert.remove();
+
+                const migrationDiv = document.createElement('div');
+                migrationDiv.id = 'migrationAlert';
+                migrationDiv.style.background = 'rgba(255, 165, 0, 0.15)';
+                migrationDiv.style.border = '1px solid orange';
+                migrationDiv.style.color = '#ffb74d';
+                migrationDiv.style.padding = '1.5rem';
+                migrationDiv.style.marginBottom = '2rem';
+                migrationDiv.style.borderRadius = '12px';
+                migrationDiv.innerHTML = `
+                    <h3 style="color: #ff9800; margin-bottom: 0.5rem;">⚠️ Local Data Found</h3>
+                    <p style="margin-bottom: 1rem;">You have ${localPhotos.length} photos saved in Local Storage. These photos are not yet in the cloud and may be lost if clear your browser cache.</p>
+                    <button class="btn-primary" onclick="migratePhotos()" style="width: auto; padding: 0.6rem 1.2rem; margin-right: 1rem;">Sync Photos to Cloud</button>
+                    <button class="btn-secondary" onclick="document.getElementById('migrationAlert').remove()" style="width: auto; padding: 0.6rem 1.2rem;">Ignore</button>
+                    <div id="migrationProgress" style="margin-top:10px; font-weight:bold;"></div>
+                `;
+                const logoutBtn = document.querySelector('.logout-btn');
+                if (logoutBtn) logoutBtn.parentNode.insertBefore(migrationDiv, logoutBtn.nextSibling);
+            }
+        }
+
+        function dataURLtoBlob(dataurl) {
+            try {
+                var arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+                    bstr = atob(arr[1]), n = bstr.length, u8arr = new Uint8Array(n);
+                while (n--) {
+                    u8arr[n] = bstr.charCodeAt(n);
+                }
+                return new Blob([u8arr], { type: mime });
+            } catch (e) {
+                console.error("Blob conversion failed", e);
+                return null;
+            }
+        }
+
+        async function migratePhotos() {
+            const localPhotos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
+            const progressDiv = document.getElementById('migrationProgress');
+            const btn = document.querySelector('#migrationAlert .btn-primary');
+            btn.disabled = true;
+            btn.innerText = "Syncing...";
+
+            let count = 0;
+            let successCount = 0;
+            let errors = [];
+
+            for (const photo of localPhotos) {
+                count++;
+                progressDiv.innerText = `Processing ${count}/${localPhotos.length}: ${photo.title}...`;
+
+                try {
+                    // 1. Convert Data
+                    let blob = dataURLtoBlob(photo.image);
+                    if (!blob) throw new Error("Image conversion failed");
+
+                    // 2. Upload to Storage
+                    let downloadURL;
+                    try {
+                        const storageRef = storage.ref(`gallery/migrated_${photo.id}.jpg`);
+                        progressDiv.innerText = `Uploading Image ${count}...`;
+                        await storageRef.put(blob);
+                        downloadURL = await storageRef.getDownloadURL();
+                    } catch (storageError) {
+                        console.error("Storage Error:", storageError);
+                        throw new Error(`STORAGE (Image) Blocked: ${storageError.code || storageError.message}`);
+                    }
+
+                    // 3. Save to Firestore
+                    try {
+                        progressDiv.innerText = `Saving Data ${count}...`;
+                        await db.collection('photos').add({
+                            id: photo.id,
+                            title: photo.title,
+                            category: photo.category,
+                            image: downloadURL,
+                            exif: photo.exif || {},
+                            createdAt: Date.now() // Use client time to avoid server-timestamp permission issues
+                        });
+                    } catch (dbError) {
+                        console.error("Firestore Error:", dbError);
+                        throw new Error(`DATABASE (Text) Blocked: ${dbError.code || dbError.message}\n\nCheck your Firestore Rules in Firebase Console.`);
+                    }
+
+                    successCount++;
+                } catch (e) {
+                    console.error("Migration Step Failed:", e);
+                    errors.push(e.message);
+                }
+            }
+
+            if (successCount === localPhotos.length) {
+                progressDiv.innerText = `Success! Synced ${successCount} photos.`;
+                if (confirm("All photos synced! Delete local copies?")) {
+                    localStorage.removeItem('galleryPhotos');
+                    document.getElementById('migrationAlert').remove();
+                }
+            } else {
+                progressDiv.innerText = `Failed. Synced ${successCount}/${localPhotos.length}.`;
+                alert(`Sync Error Details:\n\n${errors[0]}\n\n(See Console for full log)`);
+            }
+
+            loadPhotos();
+        }
+
+        function previewImage() {
+            const file = document.getElementById('photoFile').files[0];
+            const preview = document.getElementById('imagePreview');
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    preview.src = e.target.result;
+                    preview.classList.add('show');
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+
+        document.getElementById('uploadForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const file = document.getElementById('photoFile').files[0];
+            if (!file) return;
+
+            const title = document.getElementById('photoTitle').value;
+            const category = document.getElementById('photoCategory').value;
+            const phone = document.getElementById('phoneModel').value;
+
+            const exif = {
+                camera: phone,
+                lens: 'Built-in',
+                aperture: document.getElementById('aperture').value || 'Auto',
+                shutter: document.getElementById('shutter').value || 'Auto',
+                iso: document.getElementById('iso').value || 'Auto',
+                focalLength: document.getElementById('focalLength').value || 'Auto',
+                date: formatDate(document.getElementById('dateTaken').value)
+            };
+
+            const btn = document.querySelector('#uploadForm button[type="submit"]');
+            const originalBtnText = btn.innerText;
+            btn.innerText = "Uploading...";
+            btn.disabled = true;
+
+            if (useFirebase) {
+                const storageRef = storage.ref(`gallery/${Date.now()}_${file.name}`);
+                storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL())
+                    .then(downloadURL => {
+                        return db.collection('photos').add({
+                            id: Date.now(),
+                            title: title,
+                            category: category,
+                            image: downloadURL,
+                            exif: exif,
+                            createdAt: Date.now()
+                        });
+                    }).then(() => {
+                        resetForm(btn, originalBtnText);
+                    }).catch(error => {
+                        alert("Upload failed: " + error.message);
+                        btn.innerText = originalBtnText;
+                        btn.disabled = false;
+                    });
+            } else {
+                saveLocalPhoto(file, { title, category, exif }, btn, originalBtnText);
+            }
+        });
+
+        function saveLocalPhoto(file, data, btn, btnText) {
+            const MAX_WIDTH = 1200;
+            const MAX_HEIGHT = 1200;
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const img = new Image();
+                img.onload = function () {
+                    let width = img.width;
+                    let height = img.height;
+                    if (width > height) {
+                        if (width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                    } else {
+                        if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                    }
+                    const canvas = document.createElement('canvas');
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.7);
+
+                    try {
+                        let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
+                        photos.unshift({ // Add to beginning of array
+                            id: Date.now(),
+                            title: data.title,
+                            category: data.category,
+                            image: dataUrl,
+                            exif: data.exif
+                        });
+                        localStorage.setItem('galleryPhotos', JSON.stringify(photos));
+                        resetForm(btn, btnText);
+                    } catch (error) {
+                        alert("Storage Full!");
+                        btn.innerText = btnText;
+                        btn.disabled = false;
+                    }
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function resetForm(btn, btnText) {
+            document.getElementById('successMessage').classList.add('show');
+            setTimeout(() => document.getElementById('successMessage').classList.remove('show'), 3000);
+            document.getElementById('uploadForm').reset();
+            document.getElementById('imagePreview').classList.remove('show');
+            btn.innerText = btnText;
+            btn.disabled = false;
+            loadPhotos();
+        }
+
+        function uploadProfilePhoto() {
+            const file = document.getElementById('profilePhoto').files[0];
+            if (!file) { alert("Please select a photo first."); return; }
+
+            const btn = document.querySelector('button[onclick="uploadProfilePhoto()"]');
+            const originalText = btn.innerText;
+            btn.innerText = "Uploading...";
+            btn.disabled = true;
+
+            if (useFirebase) {
+                const storageRef = storage.ref(`profile/about_photo_${Date.now()}`); // Unique name to avoid cache issues
+                storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL())
+                    .then(url => {
+                        // Save to Firestore so ALL devices can see it
+                        return db.collection('settings').doc('profile').set({
+                            image: url,
+                            updatedAt: Date.now()
+                        });
+                    })
+                    .then(() => {
+                        alert("Profile photo updated globally!");
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    })
+                    .catch(error => {
+                        console.error("Profile Upload Error:", error);
+                        alert("Error: " + error.message);
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    });
+            } else {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    localStorage.setItem('aboutPhoto', e.target.result);
+                    alert("Profile photo updated (Local Only)!");
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updatePaymentSettings() {
+            const upiId = document.getElementById('upiIdInput').value.trim();
+            const qrFile = document.getElementById('qrCodeInput').files[0];
+            const btn = document.querySelector('button[onclick="updatePaymentSettings()"]');
+            const originalText = btn.innerText;
+
+            btn.innerText = "Saving...";
+            btn.disabled = true;
+
+            if (useFirebase) {
+                const saveToFirestore = (qrUrl) => {
+                    const data = { upiId: upiId };
+                    if (qrUrl) data.qrImage = qrUrl;
+
+                    db.collection('settings').doc('payment').set(data, { merge: true })
+                        .then(() => {
+                            alert("Payment settings synced to Cloud!");
+                            btn.innerText = originalText;
+                            btn.disabled = false;
+                        })
+                        .catch(e => {
+                            alert("Error saving settings: " + e.message);
+                            btn.innerText = originalText;
+                            btn.disabled = false;
+                        });
+                };
+
+                if (qrFile) {
+                    const storageRef = storage.ref(`payment/qr_code_${Date.now()}`);
+                    storageRef.put(qrFile).then(snapshot => snapshot.ref.getDownloadURL())
+                        .then(url => saveToFirestore(url))
+                        .catch(e => {
+                            alert("QR Upload Failed: " + e.message);
+                            btn.innerText = originalText;
+                            btn.disabled = false;
+                        });
+                } else {
+                    saveToFirestore(null);
+                }
+            } else {
+                // LocalStorage Fallback
+                let paymentConfig = JSON.parse(localStorage.getItem('paymentConfig') || '{}');
+                if (upiId) paymentConfig.upiId = upiId;
+
+                if (qrFile) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        paymentConfig.qrImage = e.target.result;
+                        localStorage.setItem('paymentConfig', JSON.stringify(paymentConfig));
+                        alert("Payment settings saved (Local Only)!");
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                    };
+                    reader.readAsDataURL(qrFile);
+                } else {
+                    localStorage.setItem('paymentConfig', JSON.stringify(paymentConfig));
+                    alert("Payment settings saved (Local Only)!");
+                    btn.innerText = originalText;
+                    btn.disabled = false;
+                }
+            }
+        }
+
+        function formatDate(dateString) { try { return new Date(dateString).toLocaleDateString(); } catch (e) { return dateString; } }
+
+        function loadPhotos() {
+            const photosList = document.getElementById('photosList');
+            if (useFirebase) {
+                photosList.innerHTML = '<p>Loading photos from cloud...</p>';
+                db.collection('photos').orderBy('createdAt', 'desc').get().then(snapshot => {
+                    if (snapshot.empty) {
+                        photosList.innerHTML = '<p>No photos in cloud yet.</p>';
+                        return;
+                    }
+                    let html = `<h2>Cloud Photos (${snapshot.size})</h2>`;
+                    snapshot.forEach(doc => {
+                        const photo = doc.data();
+                        html += `
+                            <div class="photo-item">
+                                <img src="${photo.image}" alt="${photo.title}">
+                                <div class="photo-info">
+                                    <div class="photo-title">${photo.title}</div>
+                                    <div class="photo-category">${photo.category}</div>
+                                </div>
+                                <button class="btn-delete" onclick="deletePhoto('${doc.id}')">Delete</button>
+                            </div>`;
+                    });
+                    photosList.innerHTML = html;
+                });
+            } else {
+                const photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
+                let html = `<h2>Local Photos (${photos.length})</h2>`;
+                photos.forEach(photo => {
+                    html += `
+                        <div class="photo-item">
+                            <img src="${photo.image}" alt="${photo.title}">
+                             <div class="photo-info"><div class="photo-title">${photo.title}</div></div>
+                            <button class="btn-delete" onclick="deletePhoto('${photo.id}')">Delete</button>
+                        </div>
+                    `;
+                });
+                photosList.innerHTML = html;
+            }
+        }
+
+        function deletePhoto(id) {
+            if (!confirm('Delete photo?')) return;
+            if (useFirebase) {
+                db.collection('photos').doc(id).delete().then(() => loadPhotos()).catch(e => alert(e.message));
+            } else {
+                let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
+                photos = photos.filter(photo => photo.id !== id);
+                localStorage.setItem('galleryPhotos', JSON.stringify(photos));
+                loadPhotos();
+            }
+        }
+    </script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="config.js?v=cloud_fix_3"></script>
+
+    <script>
+        // Initialize Firebase variables
+        let db, storage, auth;
+        let useFirebase = false;
+
+        // Wait for scripts to load
+        window.onload = function() {
+            // Check availability
+            if (typeof firebase !== 'undefined' && typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.startsWith("AIza")) {
+                console.log("Starting Firebase Init...", FIREBASE_CONFIG);
+                try {
+                    firebase.initializeApp(FIREBASE_CONFIG);
+                    db = firebase.firestore();
+                    storage = firebase.storage();
+                    auth = firebase.auth();
+                    useFirebase = true;
+                    
+                    console.log("Firebase Init Success! Mode: Cloud");
+
+                    // Switch Login UI to Email/Password
+                    setupFirebaseUI();
+
+                    // Check auth state
+                    auth.onAuthStateChanged(user => {
+                        if (user) {
+                            showUploadUI();
+                            checkMigrationNeeded(); 
+                        } else {
+                            showLoginUI();
+                        }
+                    });
+                } catch (e) {
+                    console.error("Firebase init failed:", e);
+                    useLocalMode();
+                }
+            } else {
+                console.warn("Firebase libs not found or config invalid. Falling back to Local Mode.");
+                useLocalMode();
+            }
+        };
+
+        function setupFirebaseUI() {
+            const loginLabel = document.querySelector('.login-box .form-group label');
+            if (loginLabel) loginLabel.textContent = 'Email';
+            const passInput = document.getElementById('adminPassword');
+            if (passInput) {
+                passInput.type = 'email';
+                passInput.placeholder = 'Enter admin email';
+            }
+            // Avoid duplicate password fields if re-running
+            if (!document.getElementById('realPassword')) {
+                const passGroup = document.createElement('div');
+                passGroup.className = 'form-group';
+                passGroup.innerHTML = `
+                    <label>Password</label>
+                    <input type="password" id="realPassword" placeholder="Enter password">
+                `;
+                const firstGroup = document.querySelector('.login-box .form-group');
+                if (firstGroup) firstGroup.after(passGroup);
+            }
+        }
+
+        function useLocalMode() {
+            window.ADMIN_PASSWORD = 'PassMeIN';
+            // Ensure login UI is reset for local mode
+            const loginLabel = document.querySelector('.login-box .form-group label');
+            if (loginLabel) loginLabel.textContent = 'Password';
+        }
+
+        function showLoginUI() {
+            document.getElementById('loginBox').style.display = 'block';
+            document.getElementById('uploadBox').style.display = 'none';
+        }
+
+        function showUploadUI() {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('uploadBox').style.display = 'block';
+            loadPhotos();
+        }
+
+        function login() {
+            if (useFirebase) {
+                const email = document.getElementById('adminPassword').value;
+                const pass = document.getElementById('realPassword').value;
+
+                auth.signInWithEmailAndPassword(email, pass)
+                    .then(() => showUploadUI())
+                    .catch(error => alert("Login Failed: " + error.message));
+            } else {
+                const password = document.getElementById('adminPassword').value;
+                if (password === window.ADMIN_PASSWORD) {
+                    sessionStorage.setItem('adminLoggedIn', 'true');
+                    showUploadUI();
+                } else {
+                    alert('Incorrect password!');
+                }
+            }
+        }
+
+        // ... Previous Image Handling Functions ...
+        // (We attach the rest of the functions here to ensure they exist in scope)
+        
+        // This is a placeholder for the functions defined previously in the file. 
+        // We need to make sure we don't duplicate them or leave them orphaned.
+        // Since I'm replacing the bottom block, I'll just close the script here.
+        // The user's previous code had functions defined inside the script block. 
+        // I should have used replacement for the whole file or carefully targeted ranges.
+        // Let's use a simpler strategy: Just move the INIT logic to window.onload.
+    </script>
+
+</html>
