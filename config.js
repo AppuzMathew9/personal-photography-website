@@ -6,12 +6,12 @@
 // PASTE YOUR FIREBASE CONFIG HERE
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const FIREBASE_CONFIG = {
-    apiKey: "AIzaSyAR99iskOS2wnxZbDw5OLmhJnEhIXxO4M0",
+    apiKey: "AIzaSyAR99iskOS2wnxZbDw5OLmhJnEhIXxxxxx",
     authDomain: "mathew-portfolio.firebaseapp.com",
     projectId: "mathew-portfolio",
     storageBucket: "mathew-portfolio.firebasestorage.app",
     messagingSenderId: "1031256034202",
-    appId: "1:1031256034202:web:94b4fec526d824d656c823"
+    appId: "1:1031259393202:web:94b4fec526d824d656c823"
 };
 
 const SITE_INFO = {
