@@ -325,7 +325,7 @@
             }
         }
 
-        if (!useFirebase && sessionStorage.getItem('adminLoggedIn') === 'true') {
+        if (!window.useFirebase && sessionStorage.getItem('adminLoggedIn') === 'true') {
             showUploadUI();
         }
 
