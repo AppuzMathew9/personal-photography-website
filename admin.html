@@ -304,7 +304,17 @@
         </div>
     </div>
 
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
+    <script src="config.js?v=cloud_fix_3"></script>
+
     <script>
+        // Initialize global variables right at the top
+        let db, storage, auth;
+        let useFirebase = false;
 
         function logout() {
             if (useFirebase) {
@@ -323,7 +333,6 @@
         function checkMigrationNeeded() {
             const localPhotos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
             if (localPhotos.length > 0) {
-                // Remove existing if any
                 const existingAlert = document.getElementById('migrationAlert');
                 if (existingAlert) existingAlert.remove();
 
@@ -337,7 +346,7 @@
                 migrationDiv.style.borderRadius = '12px';
                 migrationDiv.innerHTML = `
                     <h3 style="color: #ff9800; margin-bottom: 0.5rem;">⚠️ Local Data Found</h3>
-                    <p style="margin-bottom: 1rem;">You have ${localPhotos.length} photos saved in Local Storage. These photos are not yet in the cloud and may be lost if clear your browser cache.</p>
+                    <p style="margin-bottom: 1rem;">You have ${localPhotos.length} photos saved in Local Storage. These photos are not yet in the cloud and may be lost if you clear your browser cache.</p>
                     <button class="btn-primary" onclick="migratePhotos()" style="width: auto; padding: 0.6rem 1.2rem; margin-right: 1rem;">Sync Photos to Cloud</button>
                     <button class="btn-secondary" onclick="document.getElementById('migrationAlert').remove()" style="width: auto; padding: 0.6rem 1.2rem;">Ignore</button>
                     <div id="migrationProgress" style="margin-top:10px; font-weight:bold;"></div>
@@ -377,11 +386,9 @@
                 progressDiv.innerText = `Processing ${count}/${localPhotos.length}: ${photo.title}...`;
 
                 try {
-                    // 1. Convert Data
                     let blob = dataURLtoBlob(photo.image);
                     if (!blob) throw new Error("Image conversion failed");
 
-                    // 2. Upload to Storage
                     let downloadURL;
                     try {
                         const storageRef = storage.ref(`gallery/migrated_${photo.id}.jpg`);
@@ -393,7 +400,6 @@
                         throw new Error(`STORAGE (Image) Blocked: ${storageError.code || storageError.message}`);
                     }
 
-                    // 3. Save to Firestore
                     try {
                         progressDiv.innerText = `Saving Data ${count}...`;
                         await db.collection('photos').add({
@@ -402,11 +408,11 @@
                             category: photo.category,
                             image: downloadURL,
                             exif: photo.exif || {},
-                            createdAt: Date.now() // Use client time to avoid server-timestamp permission issues
+                            createdAt: Date.now()
                         });
                     } catch (dbError) {
                         console.error("Firestore Error:", dbError);
-                        throw new Error(`DATABASE (Text) Blocked: ${dbError.code || dbError.message}\n\nCheck your Firestore Rules in Firebase Console.`);
+                        throw new Error(`DATABASE (Text) Blocked: ${dbError.code || dbError.message}`);
                     }
 
                     successCount++;
@@ -424,7 +430,7 @@
                 }
             } else {
                 progressDiv.innerText = `Failed. Synced ${successCount}/${localPhotos.length}.`;
-                alert(`Sync Error Details:\n\n${errors[0]}\n\n(See Console for full log)`);
+                alert(`Sync Error Details:\n\n${errors[0]}`);
             }
 
             loadPhotos();
@@ -514,7 +520,7 @@
 
                     try {
                         let photos = JSON.parse(localStorage.getItem('galleryPhotos') || '[]');
-                        photos.unshift({ // Add to beginning of array
+                        photos.unshift({
                             id: Date.now(),
                             title: data.title,
                             category: data.category,
@@ -554,10 +560,9 @@
             btn.disabled = true;
 
             if (useFirebase) {
-                const storageRef = storage.ref(`profile/about_photo_${Date.now()}`); // Unique name to avoid cache issues
+                const storageRef = storage.ref(`profile/about_photo_${Date.now()}`);
                 storageRef.put(file).then(snapshot => snapshot.ref.getDownloadURL())
                     .then(url => {
-                        // Save to Firestore so ALL devices can see it
                         return db.collection('settings').doc('profile').set({
                             image: url,
                             updatedAt: Date.now()
@@ -626,7 +631,6 @@
                     saveToFirestore(null);
                 }
             } else {
-                // LocalStorage Fallback
                 let paymentConfig = JSON.parse(localStorage.getItem('paymentConfig') || '{}');
                 if (upiId) paymentConfig.upiId = upiId;
 
@@ -702,121 +706,103 @@
                 loadPhotos();
             }
         }
-    </script>
-    <!-- Firebase SDKs -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-storage-compat.js"></script>
-    <script src="config.js?v=cloud_fix_3"></script>
 
-    <script>
-        <script>
-    // Initialize Firebase variables
-    let db, storage, auth;
-    let useFirebase = false;
+        // Window load initialization with proper persistence and session guarding
+        window.onload = function() {
+            if (typeof firebase !== 'undefined' && typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.startsWith("AIza")) {
+                console.log("Starting Firebase Init...", FIREBASE_CONFIG);
+                try {
+                    firebase.initializeApp(FIREBASE_CONFIG);
+                    db = firebase.firestore();
+                    storage = firebase.storage();
+                    auth = firebase.auth();
+                    useFirebase = true;
+                    
+                    console.log("Firebase Init Success! Mode: Cloud");
 
-    // Wait for scripts to load
-    window.onload = function() {
-        // Check availability
-        if (typeof firebase !== 'undefined' && typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.startsWith("AIza")) {
-            console.log("Starting Firebase Init...", FIREBASE_CONFIG);
-            try {
-                firebase.initializeApp(FIREBASE_CONFIG);
-                db = firebase.firestore();
-                storage = firebase.storage();
-                auth = firebase.auth();
-                useFirebase = true;
-                
-                console.log("Firebase Init Success! Mode: Cloud");
+                    auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                        .catch((error) => {
+                            console.error("Persistence error:", error);
+                        });
 
-                // 1. Set local persistence so the session stays active during uploads
-                auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
-                    .catch((error) => {
-                        console.error("Persistence error:", error);
-                    });
+                    setupFirebaseUI();
 
-                // Switch Login UI to Email/Password
-                setupFirebaseUI();
-
-                // 2. Guarded auth state listener to prevent mid-upload redirects
-                auth.onAuthStateChanged(user => {
-                    if (user) {
-                        showUploadUI();
-                        if (typeof checkMigrationNeeded === 'function') {
-                            checkMigrationNeeded(); 
+                    auth.onAuthStateChanged(user => {
+                        if (user) {
+                            showUploadUI();
+                            if (typeof checkMigrationNeeded === 'function') {
+                                checkMigrationNeeded(); 
+                            }
+                        } else {
+                            showLoginUI();
                         }
-                    } else {
-                        // Only kick back to login if session persistence truly cleared
-                        showLoginUI();
-                    }
-                });
-            } catch (e) {
-                console.error("Firebase init failed:", e);
+                    });
+                } catch (e) {
+                    console.error("Firebase init failed:", e);
+                    useLocalMode();
+                }
+            } else {
+                console.warn("Firebase libs not found or config invalid. Falling back to Local Mode.");
                 useLocalMode();
             }
-        } else {
-            console.warn("Firebase libs not found or config invalid. Falling back to Local Mode.");
-            useLocalMode();
-        }
-    };
+        };
 
-    function setupFirebaseUI() {
-        const loginLabel = document.querySelector('.login-box .form-group label');
-        if (loginLabel) loginLabel.textContent = 'Email';
-        const passInput = document.getElementById('adminPassword');
-        if (passInput) {
-            passInput.type = 'email';
-            passInput.placeholder = 'Enter admin email';
-        }
-        // Avoid duplicate password fields if re-running
-        if (!document.getElementById('realPassword')) {
-            const passGroup = document.createElement('div');
-            passGroup.className = 'form-group';
-            passGroup.innerHTML = `
-                <label>Password</label>
-                <input type="password" id="realPassword" placeholder="Enter password">
-            `;
-            const firstGroup = document.querySelector('.login-box .form-group');
-            if (firstGroup) firstGroup.after(passGroup);
-        }
-    }
-
-    function useLocalMode() {
-        window.ADMIN_PASSWORD = 'PassMeIN';
-        const loginLabel = document.querySelector('.login-box .form-group label');
-        if (loginLabel) loginLabel.textContent = 'Password';
-    }
-
-    function showLoginUI() {
-        document.getElementById('loginBox').style.display = 'block';
-        document.getElementById('uploadBox').style.display = 'none';
-    }
-
-    function showUploadUI() {
-        document.getElementById('loginBox').style.display = 'none';
-        document.getElementById('uploadBox').style.display = 'block';
-        loadPhotos();
-    }
-
-    function login() {
-        if (useFirebase) {
-            const email = document.getElementById('adminPassword').value;
-            const pass = document.getElementById('realPassword').value;
-
-            auth.signInWithEmailAndPassword(email, pass)
-                .then(() => showUploadUI())
-                .catch(error => alert("Login Failed: " + error.message));
-        } else {
-            const password = document.getElementById('adminPassword').value;
-            if (password === window.ADMIN_PASSWORD) {
-                sessionStorage.setItem('adminLoggedIn', 'true');
-                showUploadUI();
-            } else {
-                alert('Incorrect password!');
+        function setupFirebaseUI() {
+            const loginLabel = document.querySelector('.login-box .form-group label');
+            if (loginLabel) loginLabel.textContent = 'Email';
+            const passInput = document.getElementById('adminPassword');
+            if (passInput) {
+                passInput.type = 'email';
+                passInput.placeholder = 'Enter admin email';
+            }
+            if (!document.getElementById('realPassword')) {
+                const passGroup = document.createElement('div');
+                passGroup.className = 'form-group';
+                passGroup.innerHTML = `
+                    <label>Password</label>
+                    <input type="password" id="realPassword" placeholder="Enter password">
+                `;
+                const firstGroup = document.querySelector('.login-box .form-group');
+                if (firstGroup) firstGroup.after(passGroup);
             }
         }
-    }
-</script>
+
+        function useLocalMode() {
+            window.ADMIN_PASSWORD = 'PassMeIN';
+            const loginLabel = document.querySelector('.login-box .form-group label');
+            if (loginLabel) loginLabel.textContent = 'Password';
+        }
+
+        function showLoginUI() {
+            document.getElementById('loginBox').style.display = 'block';
+            document.getElementById('uploadBox').style.display = 'none';
+        }
+
+        function showUploadUI() {
+            document.getElementById('loginBox').style.display = 'none';
+            document.getElementById('uploadBox').style.display = 'block';
+            loadPhotos();
+        }
+
+        function login() {
+            if (useFirebase) {
+                const email = document.getElementById('adminPassword').value;
+                const pass = document.getElementById('realPassword').value;
+
+                auth.signInWithEmailAndPassword(email, pass)
+                    .then(() => showUploadUI())
+                    .catch(error => alert("Login Failed: " + error.message));
+            } else {
+                const password = document.getElementById('adminPassword').value;
+                if (password === window.ADMIN_PASSWORD) {
+                    sessionStorage.setItem('adminLoggedIn', 'true');
+                    showUploadUI();
+                } else {
+                    alert('Incorrect password!');
+                }
+            }
+        }
+    </script>
+</body>
 
 </html>
