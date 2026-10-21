@@ -711,113 +711,112 @@
     <script src="config.js?v=cloud_fix_3"></script>
 
     <script>
-        // Initialize Firebase variables
-        let db, storage, auth;
-        let useFirebase = false;
+        <script>
+    // Initialize Firebase variables
+    let db, storage, auth;
+    let useFirebase = false;
 
-        // Wait for scripts to load
-        window.onload = function() {
-            // Check availability
-            if (typeof firebase !== 'undefined' && typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.startsWith("AIza")) {
-                console.log("Starting Firebase Init...", FIREBASE_CONFIG);
-                try {
-                    firebase.initializeApp(FIREBASE_CONFIG);
-                    db = firebase.firestore();
-                    storage = firebase.storage();
-                    auth = firebase.auth();
-                    useFirebase = true;
-                    
-                    console.log("Firebase Init Success! Mode: Cloud");
+    // Wait for scripts to load
+    window.onload = function() {
+        // Check availability
+        if (typeof firebase !== 'undefined' && typeof FIREBASE_CONFIG !== 'undefined' && FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.startsWith("AIza")) {
+            console.log("Starting Firebase Init...", FIREBASE_CONFIG);
+            try {
+                firebase.initializeApp(FIREBASE_CONFIG);
+                db = firebase.firestore();
+                storage = firebase.storage();
+                auth = firebase.auth();
+                useFirebase = true;
+                
+                console.log("Firebase Init Success! Mode: Cloud");
 
-                    // Switch Login UI to Email/Password
-                    setupFirebaseUI();
-
-                    // Check auth state
-                    auth.onAuthStateChanged(user => {
-                        if (user) {
-                            showUploadUI();
-                            checkMigrationNeeded(); 
-                        } else {
-                            showLoginUI();
-                        }
+                // 1. Set local persistence so the session stays active during uploads
+                auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL)
+                    .catch((error) => {
+                        console.error("Persistence error:", error);
                     });
-                } catch (e) {
-                    console.error("Firebase init failed:", e);
-                    useLocalMode();
-                }
-            } else {
-                console.warn("Firebase libs not found or config invalid. Falling back to Local Mode.");
+
+                // Switch Login UI to Email/Password
+                setupFirebaseUI();
+
+                // 2. Guarded auth state listener to prevent mid-upload redirects
+                auth.onAuthStateChanged(user => {
+                    if (user) {
+                        showUploadUI();
+                        if (typeof checkMigrationNeeded === 'function') {
+                            checkMigrationNeeded(); 
+                        }
+                    } else {
+                        // Only kick back to login if session persistence truly cleared
+                        showLoginUI();
+                    }
+                });
+            } catch (e) {
+                console.error("Firebase init failed:", e);
                 useLocalMode();
             }
-        };
-
-        function setupFirebaseUI() {
-            const loginLabel = document.querySelector('.login-box .form-group label');
-            if (loginLabel) loginLabel.textContent = 'Email';
-            const passInput = document.getElementById('adminPassword');
-            if (passInput) {
-                passInput.type = 'email';
-                passInput.placeholder = 'Enter admin email';
-            }
-            // Avoid duplicate password fields if re-running
-            if (!document.getElementById('realPassword')) {
-                const passGroup = document.createElement('div');
-                passGroup.className = 'form-group';
-                passGroup.innerHTML = `
-                    <label>Password</label>
-                    <input type="password" id="realPassword" placeholder="Enter password">
-                `;
-                const firstGroup = document.querySelector('.login-box .form-group');
-                if (firstGroup) firstGroup.after(passGroup);
-            }
+        } else {
+            console.warn("Firebase libs not found or config invalid. Falling back to Local Mode.");
+            useLocalMode();
         }
+    };
 
-        function useLocalMode() {
-            window.ADMIN_PASSWORD = 'PassMeIN';
-            // Ensure login UI is reset for local mode
-            const loginLabel = document.querySelector('.login-box .form-group label');
-            if (loginLabel) loginLabel.textContent = 'Password';
+    function setupFirebaseUI() {
+        const loginLabel = document.querySelector('.login-box .form-group label');
+        if (loginLabel) loginLabel.textContent = 'Email';
+        const passInput = document.getElementById('adminPassword');
+        if (passInput) {
+            passInput.type = 'email';
+            passInput.placeholder = 'Enter admin email';
         }
-
-        function showLoginUI() {
-            document.getElementById('loginBox').style.display = 'block';
-            document.getElementById('uploadBox').style.display = 'none';
+        // Avoid duplicate password fields if re-running
+        if (!document.getElementById('realPassword')) {
+            const passGroup = document.createElement('div');
+            passGroup.className = 'form-group';
+            passGroup.innerHTML = `
+                <label>Password</label>
+                <input type="password" id="realPassword" placeholder="Enter password">
+            `;
+            const firstGroup = document.querySelector('.login-box .form-group');
+            if (firstGroup) firstGroup.after(passGroup);
         }
+    }
 
-        function showUploadUI() {
-            document.getElementById('loginBox').style.display = 'none';
-            document.getElementById('uploadBox').style.display = 'block';
-            loadPhotos();
-        }
+    function useLocalMode() {
+        window.ADMIN_PASSWORD = 'PassMeIN';
+        const loginLabel = document.querySelector('.login-box .form-group label');
+        if (loginLabel) loginLabel.textContent = 'Password';
+    }
 
-        function login() {
-            if (useFirebase) {
-                const email = document.getElementById('adminPassword').value;
-                const pass = document.getElementById('realPassword').value;
+    function showLoginUI() {
+        document.getElementById('loginBox').style.display = 'block';
+        document.getElementById('uploadBox').style.display = 'none';
+    }
 
-                auth.signInWithEmailAndPassword(email, pass)
-                    .then(() => showUploadUI())
-                    .catch(error => alert("Login Failed: " + error.message));
+    function showUploadUI() {
+        document.getElementById('loginBox').style.display = 'none';
+        document.getElementById('uploadBox').style.display = 'block';
+        loadPhotos();
+    }
+
+    function login() {
+        if (useFirebase) {
+            const email = document.getElementById('adminPassword').value;
+            const pass = document.getElementById('realPassword').value;
+
+            auth.signInWithEmailAndPassword(email, pass)
+                .then(() => showUploadUI())
+                .catch(error => alert("Login Failed: " + error.message));
+        } else {
+            const password = document.getElementById('adminPassword').value;
+            if (password === window.ADMIN_PASSWORD) {
+                sessionStorage.setItem('adminLoggedIn', 'true');
+                showUploadUI();
             } else {
-                const password = document.getElementById('adminPassword').value;
-                if (password === window.ADMIN_PASSWORD) {
-                    sessionStorage.setItem('adminLoggedIn', 'true');
-                    showUploadUI();
-                } else {
-                    alert('Incorrect password!');
-                }
+                alert('Incorrect password!');
             }
         }
-
-        // ... Previous Image Handling Functions ...
-        // (We attach the rest of the functions here to ensure they exist in scope)
-        
-        // This is a placeholder for the functions defined previously in the file. 
-        // We need to make sure we don't duplicate them or leave them orphaned.
-        // Since I'm replacing the bottom block, I'll just close the script here.
-        // The user's previous code had functions defined inside the script block. 
-        // I should have used replacement for the whole file or carefully targeted ranges.
-        // Let's use a simpler strategy: Just move the INIT logic to window.onload.
-    </script>
+    }
+</script>
 
 </html>
