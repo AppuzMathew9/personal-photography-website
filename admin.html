@@ -325,8 +325,10 @@
             }
         }
 
-        if (!window.useFirebase && sessionStorage.getItem('adminLoggedIn') === 'true') {
-            showUploadUI();
+        if (    typeof useFirebase !== 'undefined' &&
+                    !useFirebase &&
+                    sessionStorage.getItem('adminLoggedIn') === 'true') {
+                showUploadUI();
         }
 
         // --- MIGRATION LOGIC ---
