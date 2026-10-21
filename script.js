@@ -701,14 +701,18 @@ window.addEventListener('scroll', () => {
             heroContent.style.opacity = 1 - (scrolled / 700);
         }
     }
-}
-    const handleUpload = (e) => {
-  // This stops the form from reloading the page
-  e.preventDefault(); 
+}); // <-- Properly closed scroll listener
 
-  // Your Firebase storage upload code goes here...
-  const file = e.target[0]?.files[0];
-  if (!file) return;
+// Dedicated upload handler (outside of other functions)
+const handleUpload = (e) => {
+    // This stops the form from reloading the page
+    e.preventDefault(); 
+
+    const file = e.target[0]?.files[0];
+    if (!file) return;
+    
+    // Your Firebase storage upload logic here...
+};
   
   // const storageRef = ref(storage, `images/${file.name}`);
   // uploadBytes(storageRef, file).then(...);
